@@ -1,224 +1,231 @@
-import React, { useState, useEffect } from "react";
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Vocab Fill-in-the-Blank — Static</title>
+  <style>
+    :root{
+      --bg1:#fff8f0; --accent1:#ffb347; --accent2:#ff914d; --card:#fff6e9; --text:#5b3a29;
+    }
+    body{margin:0;font-family:Inter, system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', Arial; background:linear-gradient(180deg,var(--bg1),#fff3e0); color:var(--text);}
+    .wrap{max-width:920px;margin:36px auto;padding:22px}
+    .card{background:linear-gradient(145deg,#fff7ef,#fff1e6);border-radius:14px;padding:28px;box-shadow:0 8px 30px rgba(0,0,0,.08);}
+    h1{margin:0 0 14px;font-size:32px;color:var(--accent2)}
+    .study-list{display:grid;grid-template-columns:1fr;gap:10px;margin-bottom:18px}
+    .term{background:#fff3e0;padding:12px;border-radius:10px;border:1px solid rgba(0,0,0,.04)}
+    .controls{margin-top:12px}
+    button{background:var(--accent2);color:white;border:none;padding:10px 14px;border-radius:10px;font-weight:600;cursor:pointer;margin-right:8px}
+    button.secondary{background:#ffd6b3;color:var(--text)}
+    .sentence{font-size:20px;line-height:1.6;margin:20px 0}
+    input.inline-answer{font-size:18px;padding:6px 10px;border-radius:8px;border:2px solid var(--accent1);width:220px;text-align:center}
+    .feedback{margin-top:12px;font-size:18px;font-weight:600}
+    .definition{margin-top:8px;font-style:italic;color:#7a4b2e}
+    .footer{margin-top:18px;font-size:14px;color:#6b4a36}
+    @media (min-width:700px){.study-list{grid-template-columns:repeat(2,1fr)}}
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <div class="card">
+      <h1>Vocabulary Review Game</h1>
 
-export default function VocabGame() {
+      <div id="studySection">
+        <p style="margin-top:0">Study Mode — review the words and definitions, then press <strong>Start Game</strong>.</p>
+        <div class="study-list" id="studyList"></div>
+        <div class="controls">
+          <button id="startBtn">Start Game</button>
+          <button id="shuffleBtn" class="secondary">Shuffle Examples</button>
+        </div>
+      </div>
+
+      <div id="gameSection" style="display:none">
+        <div class="sentence" id="sentenceBox"></div>
+        <div>
+          <button id="submitBtn">Submit</button>
+          <button id="skipBtn" class="secondary">Skip</button>
+          <button id="restartBtn" class="secondary" style="float:right">Restart</button>
+        </div>
+        <div class="feedback" id="feedback"></div>
+        <div class="definition" id="definitionBox"></div>
+        <div class="footer" id="progress"></div>
+      </div>
+
+    </div>
+  </div>
+
+<script>
+(() => {
+  // vocab set (latest requested)
   const vocab = [
-    {
-      word: "Pervasive",
-      definition: "Spreading widely throughout an area or group of people.",
-      sentences: [
-        "The influence of technology is so ___ that it's hard to imagine life without it.",
-        "A ___ sense of optimism filled the city after the announcement.",
-        "Corruption had become ___ in the system, affecting even the most honest officials.",
-      ],
-    },
-    {
-      word: "Elated",
-      definition: "Extremely happy or proud; in high spirits.",
-      sentences: [
-        "She was ___ after hearing she had been accepted into her dream school.",
-        "The team felt ___ as they lifted the trophy in celebration.",
-        "He was ___ by the news of his promotion.",
-      ],
-    },
-    {
-      word: "Recant",
-      definition: "To formally withdraw or deny a previously held statement or belief.",
-      sentences: [
-        "Under pressure, the witness chose to ___ his earlier testimony.",
-        "The scientist refused to ___ his controversial findings.",
-        "He publicly ___ed his previous support for the policy.",
-      ],
-    },
-    {
-      word: "Implausibility",
-      definition: "The quality of being unlikely or difficult to believe.",
-      sentences: [
-        "The ___ of his excuse made everyone suspicious.",
-        "Despite the story’s ___, it captured the public’s imagination.",
-        "Her expression showed disbelief at the sheer ___ of his claim.",
-      ],
-    },
-    {
-      word: "Torrent",
-      definition: "A strong and fast-moving stream of water or other liquid; a sudden, violent outpouring.",
-      sentences: [
-        "After the storm, a ___ of water rushed down the hillside.",
-        "He unleashed a ___ of words in anger.",
-        "The actor faced a ___ of criticism after the scandal.",
-      ],
-    },
-    {
-      word: "Contorted",
-      definition: "Twisted or bent out of its normal shape.",
-      sentences: [
-        "His face was ___ with pain as he struggled to stand.",
-        "The tree’s branches were ___ by years of harsh wind.",
-        "She made a ___ expression after tasting the sour fruit.",
-      ],
-    },
-    {
-      word: "Desolation",
-      definition: "A state of emptiness, loneliness, or destruction.",
-      sentences: [
-        "The abandoned town was filled with an eerie sense of ___.",
-        "After the fire, only ___ remained where the forest once stood.",
-        "He felt a deep ___ after losing his closest friend.",
-      ],
-    },
+    { word: 'Pervasive', definition: 'Spreading widely throughout an area or group of people.', sentences: [
+      "The influence of technology is so ___ that it's hard to imagine life without it.",
+      "A ___ sense of optimism filled the city after the announcement.",
+      "Corruption had become ___ in the system, affecting even the most honest officials."
+    ]},
+    { word: 'Elated', definition: 'Extremely happy or proud; in high spirits.', sentences: [
+      "She was ___ after hearing she had been accepted into her dream school.",
+      "The team felt ___ as they lifted the trophy in celebration.",
+      "He was ___ by the news of his promotion."
+    ]},
+    { word: 'Recant', definition: 'To formally withdraw or deny a previously held statement or belief.', sentences: [
+      "Under pressure, the witness chose to ___ his earlier testimony.",
+      "The scientist refused to ___ his controversial findings.",
+      "He publicly ___ed his previous support for the policy."
+    ]},
+    { word: 'Implausibility', definition: 'The quality of being unlikely or difficult to believe.', sentences: [
+      "The ___ of his excuse made everyone suspicious.",
+      "Despite the story’s ___, it captured the public’s imagination.",
+      "Her expression showed disbelief at the sheer ___ of his claim."
+    ]},
+    { word: 'Torrent', definition: 'A strong and fast-moving stream of water or other liquid; a sudden, violent outpouring.', sentences: [
+      "After the storm, a ___ of water rushed down the hillside.",
+      "He unleashed a ___ of words in anger.",
+      "The actor faced a ___ of criticism after the scandal."
+    ]},
+    { word: 'Contorted', definition: 'Twisted or bent out of its normal shape.', sentences: [
+      "His face was ___ with pain as he struggled to stand.",
+      "The tree’s branches were ___ by years of harsh wind.",
+      "She made a ___ expression after tasting the sour fruit."
+    ]},
+    { word: 'Desolation', definition: 'A state of emptiness, loneliness, or destruction.', sentences: [
+      "The abandoned town was filled with an eerie sense of ___ .",
+      "After the fire, only ___ remained where the forest once stood.",
+      "He felt a deep ___ after losing his closest friend."
+    ]}
   ];
 
-  const [studyMode, setStudyMode] = useState(true);
-  const [gameStarted, setGameStarted] = useState(false);
-  const [currentIndex, setCurrentIndex] = useState(0);
-  const [input, setInput] = useState("");
-  const [feedback, setFeedback] = useState("");
-  const [score, setScore] = useState(0);
-  const [questions, setQuestions] = useState([]);
-  const [showDefinition, setShowDefinition] = useState(false);
-  const [gameOver, setGameOver] = useState(false);
+  // State
+  let questions = [];
+  let current = 0;
+  let score = 0;
 
-  function initQuestions() {
-    const selected = vocab.map((v) => {
-      const randomSentence = v.sentences[Math.floor(Math.random() * v.sentences.length)];
-      return { ...v, sentence: randomSentence };
-    });
-    for (let i = selected.length - 1; i > 0; i--) {
-      const j = Math.floor(Math.random() * (i + 1));
-      [selected[i], selected[j]] = [selected[j], selected[i]];
+  // DOM refs
+  const studyList = document.getElementById('studyList');
+  const startBtn = document.getElementById('startBtn');
+  const shuffleBtn = document.getElementById('shuffleBtn');
+  const studySection = document.getElementById('studySection');
+  const gameSection = document.getElementById('gameSection');
+  const sentenceBox = document.getElementById('sentenceBox');
+  const submitBtn = document.getElementById('submitBtn');
+  const skipBtn = document.getElementById('skipBtn');
+  const restartBtn = document.getElementById('restartBtn');
+  const feedback = document.getElementById('feedback');
+  const definitionBox = document.getElementById('definitionBox');
+  const progress = document.getElementById('progress');
+
+  function shuffleArray(arr){
+    for(let i=arr.length-1;i>0;i--){
+      const j=Math.floor(Math.random()*(i+1));[arr[i],arr[j]]=[arr[j],arr[i]];
     }
-    setQuestions(selected);
-    setCurrentIndex(0);
-    setInput("");
-    setFeedback("");
-    setScore(0);
-    setShowDefinition(false);
-    setGameOver(false);
-    setGameStarted(false);
-    setStudyMode(true);
+    return arr;
   }
 
-  useEffect(() => {
-    initQuestions();
-  }, []);
+  function initQuestions(){
+    // pick one random sentence per word
+    const selected = vocab.map(v=>{
+      const sent = v.sentences[Math.floor(Math.random()*v.sentences.length)];
+      return { word: v.word, definition: v.definition, sentence: sent };
+    });
+    shuffleArray(selected);
+    questions = selected;
+    current = 0; score = 0;
+    updateProgress();
+    renderStudy();
+  }
 
-  const startGame = () => {
-    setStudyMode(false);
-    setGameStarted(true);
-    setCurrentIndex(0);
-    setInput("");
-    setFeedback("");
-    setScore(0);
-    setShowDefinition(false);
-    setGameOver(false);
-  };
+  function renderStudy(){
+    studyList.innerHTML = '';
+    vocab.forEach(v=>{
+      const div = document.createElement('div');div.className='term';
+      div.innerHTML = `<strong>${v.word}</strong>: ${v.definition}`;
+      studyList.appendChild(div);
+    });
+  }
 
-  const handleSubmit = () => {
-    if (!questions || questions.length === 0) return;
-    const currentWord = questions[currentIndex].word.toLowerCase();
-    if (input.trim().toLowerCase() === currentWord) {
-      setFeedback("✅ Correct!");
-      setScore((s) => s + 1);
+  function startGame(){
+    if(questions.length===0) initQuestions();
+    studySection.style.display='none';
+    gameSection.style.display='block';
+    current=0; score=0; updateProgress(); renderQuestion();
+  }
+
+  function renderQuestion(){
+    feedback.textContent=''; definitionBox.textContent='';
+    const q = questions[current];
+    // embed input within sentence - replace placeholder '___' with input element
+    const parts = q.sentence.split('___');
+    sentenceBox.innerHTML = '';
+    parts.forEach((part,i)=>{
+      sentenceBox.appendChild(document.createTextNode(part));
+      if(i===0){ // only insert one input at the first blank
+        const input = document.createElement('input');
+        input.type='text'; input.id='answer'; input.className='inline-answer'; input.placeholder='type answer';
+        input.addEventListener('keydown', (e)=>{ if(e.key==='Enter') handleSubmit(); });
+        sentenceBox.appendChild(input);
+      }
+    });
+    updateProgress();
+    const ans = document.getElementById('answer'); if(ans) ans.focus();
+  }
+
+  function handleSubmit(){
+    const ansEl = document.getElementById('answer');
+    if(!ansEl) return;
+    const value = ansEl.value.trim();
+    if(!value) return;
+    const correct = questions[current].word;
+    if(value.toLowerCase() === correct.toLowerCase()){
+      score++;
+      feedback.style.color='green'; feedback.textContent='✅ Correct!';
     } else {
-      setFeedback(`❌ Incorrect. The word was ${questions[currentIndex].word}.`);
+      feedback.style.color='crimson'; feedback.textContent=`❌ Incorrect — correct: ${correct}`;
     }
-    setShowDefinition(true);
-  };
+    definitionBox.textContent = questions[current].definition;
+    // reveal next after short delay
+    setTimeout(()=>{
+      if(current+1 < questions.length){ current++; renderQuestion(); } else { endGame(); }
+    },1200);
+  }
 
-  const nextQuestion = () => {
-    setInput("");
-    setFeedback("");
-    setShowDefinition(false);
-    if (currentIndex + 1 < questions.length) {
-      setCurrentIndex((i) => i + 1);
-    } else {
-      setGameOver(true);
-      setGameStarted(false);
-    }
-  };
+  function skip(){
+    feedback.style.color='#c07000'; feedback.textContent=`⏭ Skipped — correct: ${questions[current].word}`;
+    definitionBox.textContent = questions[current].definition;
+    setTimeout(()=>{
+      if(current+1 < questions.length){ current++; renderQuestion(); } else { endGame(); }
+    },1000);
+  }
 
-  const restartGame = () => {
+  function endGame(){
+    sentenceBox.textContent = `🎉 Game Over! Final Score: ${score}/${questions.length}`;
+    feedback.textContent = '';
+    definitionBox.innerHTML = `<button id="playAgain" style="margin-top:12px;padding:8px 12px;border-radius:8px;background:var(--accent2);color:white;border:none">Play Again</button>`;
+    document.getElementById('playAgain').addEventListener('click', ()=>{ restart(); });
+    updateProgress(true);
+  }
+
+  function restart(){
     initQuestions();
-  };
+    // show study first to review
+    studySection.style.display='block';
+    gameSection.style.display='none';
+  }
 
-  return (
-    <div className="min-h-screen flex flex-col items-center justify-center bg-gradient-to-b from-amber-100 to-orange-200 text-brown-800 p-6 font-serif">
-      <div className="max-w-3xl bg-amber-50 rounded-2xl shadow-lg p-8 border border-amber-300">
-        <h1 className="text-4xl font-bold text-center text-amber-900 mb-6">Vocab Challenge</h1>
+  function updateProgress(final=false){
+    if(final){ progress.textContent = '' ; return; }
+    progress.textContent = `Question ${current+1} of ${questions.length} — Score: ${score}`;
+  }
 
-        {studyMode && (
-          <div>
-            <h2 className="text-2xl font-semibold mb-4 text-amber-800">Study Mode</h2>
-            {vocab.map((v, i) => (
-              <div key={i} className="mb-4 p-4 bg-amber-100 rounded-xl border border-amber-300">
-                <strong className="text-amber-900">{v.word}</strong>: {v.definition}
-              </div>
-            ))}
-            <button
-              onClick={() => startGame()}
-              className="mt-4 bg-amber-700 hover:bg-amber-800 text-white px-5 py-2 rounded-xl shadow-md"
-            >
-              Start Game
-            </button>
-          </div>
-        )}
+  // wire buttons
+  startBtn.addEventListener('click', startGame);
+  shuffleBtn.addEventListener('click', ()=>{ vocab.forEach(v=>shuffleArray(v.sentences)); initQuestions(); renderStudy(); alert('Examples shuffled.'); });
+  submitBtn.addEventListener('click', handleSubmit);
+  skipBtn.addEventListener('click', skip);
+  restartBtn.addEventListener('click', restart);
 
-        {gameStarted && !gameOver && questions.length > 0 && (
-          <div className="text-center">
-            <p className="mb-6 text-xl">
-              {questions[currentIndex].sentence.split("___").map((part, i) => (
-                <React.Fragment key={i}>
-                  {part}
-                  {i === 0 && (
-                    <input
-                      type="text"
-                      value={input}
-                      onChange={(e) => setInput(e.target.value)}
-                      className="border-b-2 border-amber-700 focus:outline-none bg-transparent text-center text-lg mx-2 w-40"
-                      placeholder="..."
-                    />
-                  )}
-                </React.Fragment>
-              ))}
-            </p>
-
-            <button
-              onClick={handleSubmit}
-              className="bg-amber-600 hover:bg-amber-700 text-white px-5 py-2 rounded-xl shadow-md m-2"
-            >
-              Submit
-            </button>
-
-            {feedback && <p className="mt-4 text-lg">{feedback}</p>}
-            {showDefinition && (
-              <p className="italic text-amber-900 mt-2 transition-opacity duration-500">
-                {questions[currentIndex].definition}
-              </p>
-            )}
-
-            {showDefinition && (
-              <button
-                onClick={nextQuestion}
-                className="mt-4 bg-amber-700 hover:bg-amber-800 text-white px-4 py-2 rounded-xl"
-              >
-                Next
-              </button>
-            )}
-          </div>
-        )}
-
-        {gameOver && (
-          <div className="text-center">
-            <h2 className="text-2xl font-semibold text-amber-900 mb-4">Game Over!</h2>
-            <p className="text-lg mb-2">Your Score: {score}/{questions.length}</p>
-            <button
-              onClick={restartGame}
-              className="bg-amber-700 hover:bg-amber-800 text-white px-5 py-2 rounded-xl shadow-md"
-            >
-              Restart
-            </button>
-          </div>
-        )}
-      </div>
-    </div>
-  );
-}
+  // init
+  initQuestions();
+})();
+</script>
+</body>
+</html>
